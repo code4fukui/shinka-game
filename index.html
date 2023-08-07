@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:">
+</head><body>
+<script type="module">
+import { Matter, createWorld } from "./matter.js";
+const { Bodies } = Matter;
+
+// 枠をつくる
+const world = createWorld(document.body);
+world.add(Bodies.rectangle(100, 450, 30, 800, { isStatic: true }));
+world.add(Bodies.rectangle(900, 450, 30, 800, { isStatic: true }));
+world.add(Bodies.rectangle(500, 835, 800, 30, { isStatic: true }));
+
+// ボール配列
+const balls = [];
+
+// ボールの大きさ
+const size = 70;
+
+setInterval(() => {
+  // 1000msec毎に5コ落とす
+  const fallBalls = (w, n) => {
+    for (let i = 0; i < n; i++) {
+      const x = 500 + Math.random() * 300 - 150;
+      const y = -300 - Math.random() * 300;
+      const b = Bodies.circle(x, y, w);
+      world.add(b);
+      balls.push(b);
+    }
+  };
+  fallBalls(size, 5);
+
+  // 画面外に落下したものを削除
+  for (let i = 0; i < balls.length; i++) {
+    if (balls[i].position.y > 1100) {
+      balls.splice(i, 1);
+      i--;
+      world.remove(balls[i]);
+    }
+  }
+}, 1000);
+
+// 2点間の距離計算
+const distance = (p1, p2) => {
+  const dx = p1.x - p2.x;
+  const dy = p1.y - p2.y;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  return len;
+};
+
+// マウス移動かマルチタッチされたとき、ボールに触れていたら消す
+world.ontouch = (p) => {
+  const nhit = balls.findIndex(b => distance(b.position, p) < size);
+  if (nhit >= 0) {
+    const hit = balls[nhit];
+    balls.splice(nhit, 1);
+    world.remove(hit);
+  }
+};
+</script>
+</body></html>
