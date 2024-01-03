@@ -1,31 +1,12 @@
-import canvasutil from "https://code4fukui.github.io/jigaku/lib/jigaku.mjs";
-//import Matter from "./matter.min.mjs";
+//import canvasutil from "https://code4fukui.github.io/jigaku/lib/jigaku.mjs";
+import canvasutil from "./jigaku.js";
 import Matter from "https://code4sabae.github.io/matter-mjs/matter.min.mjs";
 const { Engine, Render, Runner, World, Bodies } = Matter;
 
-const startRender = (engine, element) => {
+const startRender = (engine, drawWorld) => {
   const canvas = canvasutil.createFullCanvas();
   const size = [1000, 1000];
   const render = { background: "#ffffff", size, canvas };
-  const drawWorld = (g) => {
-    g.setColor(0, 0, 0);
-    const bodies = Matter.Composite.allBodies(engine.world);
-    for (const body of bodies) {
-      if (!body.render.visible) continue;
-      const p = body.position;
-      // g.fillCircle(p.x, p.y, 10);
-      g.fillStyle = body.render.fillStyle;
-      g.beginPath();
-      const v = body.vertices;
-      g.moveTo(v[0].x, v[0].y);
-      for (let i = 1; i < v.length; i++) {
-        g.lineTo(v[i].x, v[i].y);
-      }
-      g.closePath();
-      g.fill();
-    }
-  };
-
   render.offset = { x: 0, y: 0 };
   canvas.draw = (g, cw, ch) => {
     g.fillStyle = render.background;
@@ -39,10 +20,13 @@ const startRender = (engine, element) => {
     render.offset.y = offy;
     render.r = r;
     g.setTransform(r, 0, 0, r, offx, offy);
-    drawWorld(g);
+    drawWorld(g, engine);
     g.restore();
   };
-  const f = () => {
+  let bkt = null;
+  const f = (time) => {
+    //console.log(bkt - time);
+    bkt = time;
     canvas.redraw();
     requestAnimationFrame(f);
   };
@@ -50,16 +34,19 @@ const startRender = (engine, element) => {
   return render;
 };
 
-const createWorld = (element) => {
+const createWorld = (element, drawWorld) => {
   const engine = Engine.create();
   const world = engine.world;
   // const render = createRender(engine, element);
   // Render.run(render);
-  const render = startRender(engine, element);
+  const render = startRender(engine, drawWorld);
   const runner = Runner.create({ isFixed: true });
+  /*
   Matter.Events.on(runner, "tick", () => {
-    runner.deltaMin = 1000 / runner.fps;
+    runner.deltaMin = 1000 / 120; // runner.fps;
   });
+  */
+  //console.log("fps", runner.fps);
   Runner.run(runner, engine);
   const res = {
     add(body) {
@@ -92,12 +79,19 @@ const createWorld = (element) => {
     useRealGravity() {
       useDeviceMotionWorld(world);
     },
+    useUI() {
+      setUI(res, element);
+    },
   };
-  setUI(res, element);
   return res;
 };
 
+let flgsetui = false;
 const setUI = (world, div) => {
+  if (flgsetui) {
+    return;
+  }
+  flgsetui = true;
   const handleTouch = (p) => {
     if (world.ontouch) {
       world.ontouch(p);
@@ -142,7 +136,16 @@ const setUI = (world, div) => {
   }, { passive: false });
 };
 
+let setmotion = false;
 const useDeviceMotionWorld = (world) => {
+  if (setmotion) {
+    return;
+  }
+  /*
+  if (typeof window.ondevicemotion == "function") {
+    return;
+  }
+  /*
   if (
     window.DeviceMotionEvent && DeviceMotionEvent.requestPermission &&
     typeof DeviceMotionEvent.requestPermission === "function"
@@ -155,17 +158,21 @@ const useDeviceMotionWorld = (world) => {
   ) {
     DeviceOrientationEvent.requestPermission();
   }
+  */
   // Androidは逆!?
   // window.addEventListener("devicemotion", (e) => {
-  const yflg = window.navigator.userAgent.indexOf("Android") >= 0 ? -1 : 1;
-  window.ondevicemotion = (e) => {
-    if (e.accelerationIncludingGravity.x === null) return;
+  //const yflg = window.navigator.userAgent.indexOf("Android") >= 0 ? -1 : 1;
+  const yflg = 1;
+  addEventListener("devicemotion", (e) => {
+  //window.ondevicemotion = (e) => {
+    //if (e.accelerationIncludingGravity.x === null) return;
     // ball.WakeUp();
-    var xg = e.accelerationIncludingGravity.x;
-    var yg = e.accelerationIncludingGravity.y * yflg;
+    const xg = e.accelerationIncludingGravity.x;
+    const yg = e.accelerationIncludingGravity.y * yflg;
     world.gravity.x = xg / 9.8;
     world.gravity.y = -yg / 9.8;
-  };
+  });
+  setmotion = true;
 };
 
 export { createWorld, Matter };
