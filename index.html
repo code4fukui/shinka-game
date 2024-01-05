@@ -1,8 +1,8 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:">
-<title>BALL EVOLVE</title>
+<title>しんかゲーム</title>
 </head><body>
 
-<button id=btn>BALL EVOLVE</button>
+<button id=btn>しんかゲーム</button>
 <style>
 #btn {
   position: fixed;
@@ -59,7 +59,6 @@ const drawWorld = (g, engine) => {
         //g.fillStyle = "white";
         //circle(g, x, y, r3);
       }
-      //console.log(body);
     } else {
       g.beginPath();
       const v = body.vertices;
@@ -176,6 +175,7 @@ const distance = (p1, p2) => {
   return len;
 };
 
+/*
 // マウス移動かマルチタッチされたとき、ボールに触れていたら消す
 world.ontouch = (p) => {
   for (;;) {
@@ -186,6 +186,7 @@ world.ontouch = (p) => {
     world.remove(hit);
   }
 };
+*/
 
 btn.onclick = async () => {
   if (typeof DeviceMotionEvent.requestPermission === 'function') {
