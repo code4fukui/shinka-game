@@ -4,7 +4,7 @@
 
 ## デモ
 
-ゲームはこちらで遊べます: **https://code4fukui.github.io/shinka-game/**
+ゲームはこちらで遊べます: **https://github.com/code4fukui/shinka-game
 
 ## 遊び方
 

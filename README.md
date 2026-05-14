@@ -6,7 +6,7 @@ A simple, physics-based web game where you tilt your device to merge falling cir
 
 ## Demo
 
-Play the game here: **https://code4fukui.github.io/shinka-game/**
+Play the game here: **https://github.com/code4fukui/shinka-game
 
 ## How to Play
 
